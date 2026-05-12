@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentique360 — AI Chatbot Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+  <!--
+    ================================================================
+    SHOPIFY INTEGRATION — Step by step:
+
+    1. Deploy this repo to Vercel (see README.md)
+    2. Copy your Vercel URL (e.g. https://authentique360-bot.vercel.app)
+    3. In the <script> block below, set API_URL to: your-vercel-url/api/chat
+    4. Set WA_NUMBER to your WhatsApp number (international, no +)
+    5. Fill in the real product URLs and Shopify CDN image URLs
+    6. In Shopify: Online Store → Themes → Edit Code → theme.liquid
+       - Paste the <style> block inside <head>
+       - Paste the widget HTML + <script> block just before </body>
+    ================================================================
+  -->
+
+  <style>
+    /* ============================================================
+       DEMO PAGE — Remove this section when embedding in Shopify
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 0%, #1a1508 0%, #0c0b09 65%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .demo-bg {
+      text-align: center;
+      color: #9e967e;
+      padding: 2rem;
+      max-width: 500px;
+    }
+    .demo-bg h1 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #c9a84c;
+      font-size: 3rem;
+      margin: 0 0 0.2rem;
+      letter-spacing: 0.07em;
+    }
+    .demo-bg .sub { font-size: 0.88rem; opacity: 0.6; letter-spacing: 0.04em; margin-bottom: 2rem; }
+    .demo-steps {
+      background: rgba(201,168,76,0.06);
+      border: 1px solid rgba(201,168,76,0.18);
+      border-radius: 14px;
+      padding: 1.4rem 1.6rem;
+      text-align: left;
+      font-size: 0.83rem;
+      line-height: 1.75;
+    }
+    .demo-steps h3 { color: #c9a84c; margin: 0 0 0.7rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    .demo-steps ol { margin: 0; padding-left: 1.2rem; }
+    .demo-steps li { margin-bottom: 0.3rem; }
+    .demo-steps code {
+      background: rgba(201,168,76,0.1);
+      color: #e8cc7a;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.79rem;
+    }
+    .demo-steps a { color: #c9a84c; }
+    .demo-arrow { margin-top: 1.5rem; font-size: 0.79rem; opacity: 0.45; }
+
+    /* ============================================================
+       CSS VARIABLES
+    ============================================================ */
+    :root {
+      --gold:       #c9a84c;
+      --gold-light: #e8cc7a;
+      --dark:       #0c0b09;
+      --dark-2:     #171410;
+      --dark-3:     #201d18;
+      --cream:      #f0ead8;
+      --cream-dim:  #9e967e;
+      --green-wa:   #25D366;
+    }
+
+    /* ============================================================
+       FLOATING TOGGLE BUTTON
+    ============================================================ */
+    #a360-toggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+      border: none;
+      cursor: pointer;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.42);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      animation: a360-pulse 2.8s ease-in-out infinite;
+      outline: none;
+    }
+    #a360-toggle:hover {
+      transform: scale(1.09);
+      box-shadow: 0 6px 30px rgba(201,168,76,0.65);
+      animation: none;
+    }
+    #a360-toggle:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 3px; }
+    #a360-toggle svg { width: 28px; height: 28px; }
+    #a360-toggle .a360-close-icon { display: none; }
+    #a360-toggle.open .a360-chat-icon { display: none; }
+    #a360-toggle.open .a360-close-icon { display: block; }
+    @keyframes a360-pulse {
+      0%,100% { box-shadow: 0 4px 20px rgba(201,168,76,0.42); }
+      50%      { box-shadow: 0 4px 32px rgba(201,168,76,0.72), 0 0 0 10px rgba(201,168,76,0.1); }
+    }
+
+    #a360-badge {
+      position: absolute;
+      top: 1px; right: 1px;
+      width: 19px; height: 19px;
+      background: #e53e3e;
+      border-radius: 50%;
+      border: 2px solid var(--dark);
+      font-size: 10px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       CHAT WINDOW
+    ============================================================ */
+    #a360-window {
+      position: fixed;
+      bottom: 100px;
+      right: 24px;
+      width: 390px;
+      height: 600px;
+      background: var(--dark-2);
+      border: 1px solid rgba(201,168,76,0.28);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      z-index: 9998;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.75), 0 0 0 1px rgba(201,168,76,0.08), inset 0 1px 0 rgba(201,168,76,0.1);
+      transform-origin: bottom right;
+      transform: scale(0.82) translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease;
+    }
+    #a360-window.open {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+    @media (max-width: 480px) {
+      #a360-window { width: calc(100vw - 16px); height: 72vh; right: 8px; bottom: 88px; border-radius: 18px; }
+      #a360-toggle { bottom: 16px; right: 16px; }
+    }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    #a360-header {
+      background: linear-gradient(160deg, #1e1b14 0%, var(--dark-3) 100%);
+      border-bottom: 1px solid rgba(201,168,76,0.18);
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      flex-shrink: 0;
+    }
+    .a360-logo-ring {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: linear-gradient(135deg, #1e1a10, #2a2218);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 12px rgba(201,168,76,0.2);
+    }
+    .a360-logo-ring span { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 700; color: var(--gold); line-height: 1; }
+    .a360-header-info { flex: 1; min-width: 0; }
+    .a360-header-name { font-family: 'Cormorant Garamond', serif; font-size: 1.08rem; font-weight: 600; color: var(--cream); letter-spacing: 0.025em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .a360-header-status { display: flex; align-items: center; gap: 5px; margin-top: 3px; }
+    .a360-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-wa); flex-shrink: 0; animation: a360-blink 2.2s ease-in-out infinite; }
+    @keyframes a360-blink { 0%,100%{opacity:1} 50%{opacity:0.45} }
+    .a360-header-status span { font-size: 0.72rem; color: var(--cream-dim); white-space: nowrap; }
+    #a360-header-close {
+      background: none; border: none; cursor: pointer;
+      padding: 5px; color: var(--cream-dim); transition: color 0.2s;
+      display: flex; align-items: center; border-radius: 6px; flex-shrink: 0; outline: none;
+    }
+    #a360-header-close:hover { color: var(--gold); }
+
+    /* ============================================================
+       MESSAGES
+    ============================================================ */
+    #a360-messages {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      padding: 16px 14px;
+      display: flex; flex-direction: column; gap: 10px;
+      scroll-behavior: smooth;
+    }
+    #a360-messages::-webkit-scrollbar { width: 4px; }
+    #a360-messages::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius: 2px; }
+
+    .a360-msg { display: flex; flex-direction: column; max-width: 87%; gap: 6px; }
+    .a360-msg.bot  { align-self: flex-start; }
+    .a360-msg.user { align-self: flex-end; }
+
+    .a360-bubble { padding: 10px 14px; border-radius: 14px; font-size: 0.875rem; line-height: 1.6; word-break: break-word; }
+    .a360-msg.bot .a360-bubble  { background: var(--dark-3); border: 1px solid rgba(201,168,76,0.18); color: var(--cream); border-bottom-left-radius: 4px; }
+    .a360-msg.user .a360-bubble { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--dark); font-weight: 500; border-bottom-right-radius: 4px; }
+    .a360-bubble strong, .a360-bubble b { color: var(--gold-light); }
+    .a360-msg.user .a360-bubble strong,
+    .a360-msg.user .a360-bubble b { color: var(--dark); }
+    .a360-bubble em { color: var(--cream-dim); font-style: italic; }
+
+    /* ============================================================
+       PRODUCT CARDS
+    ============================================================ */
+    .a360-product-card {
+      background: var(--dark-3);
+      border: 1px solid rgba(201,168,76,0.28);
+      border-radius: 13px; overflow: hidden; width: 224px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .a360-product-card:hover { border-color: rgba(201,168,76,0.65); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+    .a360-product-img { width: 100%; height: 112px; object-fit: cover; display: block; background: var(--dark); }
+    .a360-product-img-placeholder { width: 100%; height: 112px; background: linear-gradient(135deg, #100e08, #1e1a12); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; }
+    .a360-product-info { padding: 11px 13px 12px; }
+    .a360-product-name { font-size: 0.78rem; font-weight: 600; color: var(--cream); line-height: 1.35; margin-bottom: 7px; }
+    .a360-product-pricing { display: flex; align-items: baseline; gap: 7px; margin-bottom: 4px; }
+    .a360-product-price { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 700; color: var(--gold); }
+    .a360-product-old-price { font-size: 0.75rem; color: var(--cream-dim); text-decoration: line-through; }
+    .a360-product-size { font-size: 0.7rem; color: var(--cream-dim); margin-bottom: 10px; }
+    .a360-product-cta { display: block; width: 100%; padding: 8px 0; background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--dark); font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 700; text-align: center; text-decoration: none; border: none; border-radius: 8px; cursor: pointer; letter-spacing: 0.02em; transition: opacity 0.2s, transform 0.15s; }
+    .a360-product-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    /* ============================================================
+       QUICK REPLIES
+    ============================================================ */
+    .a360-quick-replies { display: flex; flex-wrap: wrap; gap: 6px; align-self: flex-start; }
+    .a360-qr-btn { background: transparent; border: 1px solid rgba(201,168,76,0.38); color: var(--gold); padding: 5px 13px; border-radius: 20px; font-family: 'DM Sans', sans-serif; font-size: 0.74rem; cursor: pointer; transition: background 0.18s, border-color 0.18s, transform 0.15s; white-space: nowrap; outline: none; }
+    .a360-qr-btn:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); transform: translateY(-1px); }
+
+    /* ============================================================
+       TYPING INDICATOR
+    ============================================================ */
+    #a360-typing { display: none; align-self: flex-start; padding: 11px 14px; background: var(--dark-3); border: 1px solid rgba(201,168,76,0.18); border-radius: 14px; border-bottom-left-radius: 4px; gap: 5px; align-items: center; }
+    #a360-typing.visible { display: flex; }
+    .a360-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); animation: a360-bounce 1.3s ease-in-out infinite; }
+    .a360-dot:nth-child(2) { animation-delay: 0.18s; }
+    .a360-dot:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes a360-bounce { 0%,80%,100%{transform:translateY(0);opacity:0.45} 40%{transform:translateY(-7px);opacity:1} }
+
+    /* ============================================================
+       INPUT AREA
+    ============================================================ */
+    #a360-input-area { padding: 10px 13px; border-top: 1px solid rgba(201,168,76,0.13); display: flex; gap: 8px; align-items: flex-end; background: var(--dark-2); flex-shrink: 0; }
+    #a360-input { flex: 1; background: var(--dark-3); border: 1px solid rgba(201,168,76,0.22); border-radius: 12px; padding: 9px 13px; color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; resize: none; max-height: 82px; outline: none; transition: border-color 0.2s; line-height: 1.45; overflow-y: auto; }
+    #a360-input::placeholder { color: var(--cream-dim); opacity: 0.45; }
+    #a360-input:focus { border-color: rgba(201,168,76,0.52); }
+    #a360-send { width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.2s, transform 0.15s; outline: none; }
+    #a360-send:hover  { opacity: 0.86; transform: scale(1.06); }
+    #a360-send:active { transform: scale(0.97); }
+    #a360-send svg { width: 18px; height: 18px; fill: var(--dark); }
+
+    /* ============================================================
+       WHATSAPP FOOTER
+    ============================================================ */
+    #a360-wa-bar { padding: 8px 13px 10px; border-top: 1px solid rgba(201,168,76,0.08); background: var(--dark); flex-shrink: 0; }
+    #a360-wa-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 0; background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.28); border-radius: 10px; color: var(--green-wa); font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500; text-decoration: none; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+    #a360-wa-btn:hover { background: rgba(37,211,102,0.15); border-color: rgba(37,211,102,0.52); }
+    #a360-wa-btn svg { width: 16px; height: 16px; fill: var(--green-wa); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- DEMO BACKDROP — Remove in Shopify -->
+  <div class="demo-bg">
+    <h1>Authentique360</h1>
+    <p class="sub">Décants de parfums de luxe · 100% authentiques · Maroc</p>
+    <div class="demo-steps">
+      <h3>🚀 Deploy in 5 minutes</h3>
+      <ol>
+        <li>Get free key → <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys</li>
+        <li>Push this folder to GitHub</li>
+        <li>Import on <a href="https://vercel.com" target="_blank">vercel.com</a> → add env var <code>GROQ_API_KEY</code></li>
+        <li>Copy your Vercel URL → paste in <code>API_URL</code> below</li>
+        <li>Embed widget snippet in Shopify <code>theme.liquid</code></li>
+      </ol>
+    </div>
+    <p class="demo-arrow">↘ Click the gold button to open the chat</p>
+  </div>
+
+  <!-- ============================================================
+       CHATBOT WIDGET — copy everything below into theme.liquid
+  ============================================================ -->
+
+  <button id="a360-toggle" aria-label="Ouvrir le chat conseiller parfums" aria-expanded="false">
+    <span id="a360-badge" aria-label="1 nouveau message">1</span>
+    <svg class="a360-chat-icon" viewBox="0 0 24 24" fill="#0c0b09" aria-hidden="true">
+      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
+      <path d="M7 9h10v2H7zm0-3h10v2H7zm0 6h7v2H7z" opacity=".65"/>
+    </svg>
+    <svg class="a360-close-icon" viewBox="0 0 24 24" fill="none" stroke="#0c0b09" stroke-width="2.8" stroke-linecap="round" aria-hidden="true">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </svg>
+  </button>
+
+  <div id="a360-window" role="dialog" aria-modal="true" aria-label="Chat Authentique360">
+    <div id="a360-header">
+      <div class="a360-logo-ring" aria-hidden="true"><span>A</span></div>
+      <div class="a360-header-info">
+        <div class="a360-header-name">Authentique360</div>
+        <div class="a360-header-status">
+          <div class="a360-status-dot" aria-hidden="true"></div>
+          <span>Conseiller Parfums · En ligne</span>
+        </div>
+      </div>
+      <button id="a360-header-close" aria-label="Fermer le chat">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="a360-messages" role="log" aria-live="polite">
+      <div id="a360-typing" aria-label="Conseiller en train d'écrire">
+        <div class="a360-dot"></div>
+        <div class="a360-dot"></div>
+        <div class="a360-dot"></div>
+      </div>
+    </div>
+
+    <div id="a360-input-area">
+      <textarea id="a360-input" placeholder="Posez votre question..." rows="1" aria-label="Votre message" autocomplete="off"></textarea>
+      <button id="a360-send" aria-label="Envoyer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+
+    <div id="a360-wa-bar">
+      <a id="a360-wa-btn" href="#" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+        </svg>
+        Contacter sur WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ==========================================================
+    //  ★ CONFIGURE THESE 3 VALUES BEFORE GOING LIVE ★
+    // ==========================================================
+    var API_URL    = 'https://YOUR-PROJECT.vercel.app/api/chat'; // your Vercel URL
+    var WA_NUMBER  = '212600000000';   // international, no + sign
+    var WA_MSG     = 'Bonjour Authentique360, j\'ai une question sur vos parfums';
+    // ==========================================================
+
+    // Product catalog — replace URLs and image fields
+    var PRODUCTS = [
+      { id:1, name:'JPG Le Beau + D&G Light Blue',            price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:'https://authentique360.com/products/HANDLE_1', image:'' },
+      { id:2, name:"JPG Le Beau + Guerlain L'Homme Idéal",    price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:'https://authentique360.com/products/HANDLE_2', image:'' },
+      { id:3, name:'JPG Le Parfum + Armani Stronger With You', price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:'https://authentique360.com/products/HANDLE_3', image:'' },
+      { id:4, name:'JPG Le Beau + Armaf Club de Nuit',         price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:'https://authentique360.com/products/HANDLE_4', image:'' }
+    ];
+
+    // State
+    var history   = [];
+    var firstOpen = true;
+    var isOpen    = false;
+    var loading   = false;
+
+    // DOM
+    var toggle   = document.getElementById('a360-toggle');
+    var badge    = document.getElementById('a360-badge');
+    var win      = document.getElementById('a360-window');
+    var msgs     = document.getElementById('a360-messages');
+    var typing   = document.getElementById('a360-typing');
+    var input    = document.getElementById('a360-input');
+    var sendBtn  = document.getElementById('a360-send');
+    var closeBtn = document.getElementById('a360-header-close');
+    var waBtn    = document.getElementById('a360-wa-btn');
+
+    waBtn.href = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(WA_MSG);
+
+    // ----------------------------------------------------------
+    //  Open / Close
+    // ----------------------------------------------------------
+    function openChat() {
+      isOpen = true;
+      win.classList.add('open');
+      toggle.classList.add('open');
+      toggle.setAttribute('aria-expanded', 'true');
+      badge.style.display = 'none';
+      if (firstOpen) { firstOpen = false; showWelcome(); }
+      scrollBottom();
+      setTimeout(function () { input.focus(); }, 320);
+    }
+    function closeChat() {
+      isOpen = false;
+      win.classList.remove('open');
+      toggle.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.focus();
+    }
+    toggle.addEventListener('click', function () { isOpen ? closeChat() : openChat(); });
+    closeBtn.addEventListener('click', closeChat);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isOpen) closeChat(); });
+
+    // ----------------------------------------------------------
+    //  Welcome
+    // ----------------------------------------------------------
+    function showWelcome() {
+      appendBot(
+        'Bienvenue chez **Authentique360** ✨\n' +
+        'Je suis votre conseiller parfums. Nos packs 2 décants 10ml + 10ml sont à **199 DH** — ' +
+        'livraison à domicile partout au Maroc, vous payez à la réception.\n' +
+        'Comment puis-je vous aider ?',
+        true
+      );
+    }
+
+    // ----------------------------------------------------------
+    //  Render helpers
+    // ----------------------------------------------------------
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function md(s) {
+      return s
+        .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g,'<em>$1</em>')
+        .replace(/`([^`]+)`/g,'<code style="background:rgba(201,168,76,0.12);color:#e8cc7a;padding:1px 5px;border-radius:4px;font-size:.82em">$1</code>')
+        .replace(/\n/g,'<br>');
+    }
+
+    function productCard(p) {
+      var img = p.image
+        ? '<img class="a360-product-img" src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy">'
+        : '<div class="a360-product-img-placeholder">🧴</div>';
+      return '<div class="a360-product-card">'+img+
+        '<div class="a360-product-info">'+
+          '<div class="a360-product-name">'+esc(p.name)+'</div>'+
+          '<div class="a360-product-pricing">'+
+            '<span class="a360-product-price">'+esc(p.price)+'</span>'+
+            '<span class="a360-product-old-price">'+esc(p.oldPrice)+'</span>'+
+          '</div>'+
+          '<div class="a360-product-size">'+esc(p.size)+'</div>'+
+          '<a class="a360-product-cta" href="'+esc(p.url)+'" target="_blank" rel="noopener">Commander →</a>'+
+        '</div></div>';
+    }
+
+    function renderBot(raw) {
+      var parts = raw.split(/\[PRODUCT:(\d+)\]/g);
+      var html  = '';
+      for (var i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) {
+          var t = parts[i].trim();
+          if (t) html += '<div class="a360-bubble">'+md(t)+'</div>';
+        } else {
+          var id = parseInt(parts[i], 10);
+          var p  = PRODUCTS.filter(function(x){return x.id===id;})[0];
+          if (p) html += productCard(p);
+        }
+      }
+      return html || '<div class="a360-bubble">'+md(raw)+'</div>';
+    }
+
+    function quickReplies() {
+      var labels = ['Parfums pour homme','Offre en cours','Livraison & paiement','Besoin de conseils'];
+      var wrap = document.createElement('div');
+      wrap.className = 'a360-quick-replies';
+      labels.forEach(function (l) {
+        var b = document.createElement('button');
+        b.className = 'a360-qr-btn';
+        b.textContent = l;
+        b.addEventListener('click', function () { wrap.remove(); send(l); });
+        wrap.appendChild(b);
+      });
+      return wrap;
+    }
+
+    function appendBot(raw, withQR) {
+      var el = document.createElement('div');
+      el.className = 'a360-msg bot';
+      el.innerHTML = renderBot(raw);
+      msgs.insertBefore(el, typing);
+      if (withQR) msgs.insertBefore(quickReplies(), typing);
+      scrollBottom();
+    }
+    function appendUser(text) {
+      var el = document.createElement('div');
+      el.className = 'a360-msg user';
+      el.innerHTML = '<div class="a360-bubble">'+esc(text)+'</div>';
+      msgs.insertBefore(el, typing);
+      scrollBottom();
+    }
+
+    function showTyping()  { typing.classList.add('visible');    scrollBottom(); }
+    function hideTyping()  { typing.classList.remove('visible'); }
+    function scrollBottom(){ requestAnimationFrame(function(){msgs.scrollTop=msgs.scrollHeight;}); }
+
+    // ----------------------------------------------------------
+    //  API call → Vercel proxy → Groq
+    // ----------------------------------------------------------
+    function callAPI(cb) {
+      fetch(API_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ messages: history })
+      })
+      .then(function (r) {
+        if (!r.ok) return r.text().then(function(t){throw new Error('HTTP '+r.status+': '+t);});
+        return r.json();
+      })
+      .then(function (d) { cb(null, d.reply || ''); })
+      .catch(function (e) { cb(e, null); });
+    }
+
+    // ----------------------------------------------------------
+    //  Send flow
+    // ----------------------------------------------------------
+    function send(text) {
+      text = (text || '').trim();
+      if (!text || loading) return;
+
+      var qr = msgs.querySelector('.a360-quick-replies');
+      if (qr) qr.remove();
+
+      appendUser(text);
+      history.push({ role: 'user', content: text });
+
+      loading = true;
+      input.disabled = sendBtn.disabled = true;
+      showTyping();
+
+      callAPI(function (err, reply) {
+        hideTyping();
+        loading = input.disabled = sendBtn.disabled = false;
+        input.focus();
+
+        if (err) {
+          var isNetwork = /fetch|network|Failed/i.test(err.message);
+          appendBot(isNetwork
+            ? '⚠️ **Connexion impossible.**\n\nVérifiez que le proxy Vercel est déployé et que l\'URL `API_URL` est correcte dans le widget.'
+            : 'Une erreur s\'est produite. Contactez-nous via WhatsApp.');
+          console.error('[A360]', err);
+          return;
+        }
+
+        history.push({ role: 'assistant', content: reply });
+        appendBot(reply);
+      });
+    }
+
+    // ----------------------------------------------------------
+    //  Input events
+    // ----------------------------------------------------------
+    sendBtn.addEventListener('click', function () {
+      send(input.value); input.value = ''; input.style.height = 'auto';
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault(); send(input.value); input.value = ''; input.style.height = 'auto';
+      }
+    });
+    input.addEventListener('input', function () {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 82) + 'px';
+    });
+
+  })();
+  </script>
+
+</body>
+</html>
