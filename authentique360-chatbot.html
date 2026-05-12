@@ -375,17 +375,71 @@
     // ==========================================================
     //  ★ CONFIGURE THESE 3 VALUES BEFORE GOING LIVE ★
     // ==========================================================
-    var API_URL    = 'https://authentique360-bot-two.vercel.app/api/chat';
-    var WA_NUMBER  = '212600000000';   // international, no + sign
-    var WA_MSG     = 'Bonjour Authentique360, j\'ai une question sur vos parfums';
+    var API_URL   = 'https://authentique360-bot-two.vercel.app/api/chat';
+    var WA_NUMBER = '212621585473';
+    var WA_MSG    = 'Bonjour Authentique360, j\'ai une question sur vos parfums';
     // ==========================================================
 
-    // Product catalog — replace URLs and image fields
+    var BASE = 'https://authentique360.com/products/';
+    var CDN  = 'https://cdn.shopify.com/s/files/1/0994/7607/8961/files/';
+
     var PRODUCTS = [
-      { id:1, name:'JPG Le Beau + D&G Light Blue',            price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:'https://authentique360.com/products/HANDLE_1', image:'' },
-      { id:2, name:"JPG Le Beau + Guerlain L'Homme Idéal",    price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:'https://authentique360.com/products/HANDLE_2', image:'' },
-      { id:3, name:'JPG Le Parfum + Armani Stronger With You', price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:'https://authentique360.com/products/HANDLE_3', image:'' },
-      { id:4, name:'JPG Le Beau + Armaf Club de Nuit',         price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:'https://authentique360.com/products/HANDLE_4', image:'' }
+      { id:1,  name:"Duo Intense – Le Beau Flower & Dior Homme Intense", price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:BASE+'duo-intense-le-beau-flower-dior-homme-intense', image:CDN+'1778279175789.jpg?v=1778279519' },
+      { id:2,  name:"Duo Light – Sauvage & Hugo",                        price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:BASE+'duo-light-sauvage-hugo',                        image:CDN+'1778279175798.jpg?v=1778279459' },
+      { id:3,  name:"Duo Fight – Vulcan Feu & Stronger With You",        price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:BASE+'duo-fight-vulcan-feu-stronger-with-you',        image:CDN+'1778279175793.jpg?v=1778279392' },
+      { id:4,  name:"Pack Séduction Intense",                            price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:BASE+'pack-seduction-intense',                        image:CDN+'file_00000000496871f49db467c224fb9bc3.png?v=1778274432' },
+      { id:5,  name:"Pack Séduction Élégante",                           price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:BASE+'pack-seduction-elegante',                       image:CDN+'file_00000000df9071f4ae5341506c77b22f.png?v=1778274432' },
+      { id:6,  name:"Pack Fraîcheur Méditerranéenne",                    price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:BASE+'pack-fraicheur-mediterraneenne',                 image:CDN+'file_00000000361472469ccf77618f10c632.png?v=1778274429' },
+      { id:7,  name:"Pack Parfums Decants",                              price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:BASE+'pack-parfums-decants',                          image:CDN+'file_000000001b2871f49606334e47f89e37.png?v=1778274430' },
+      { id:8,  name:"Pack 3 parfums de luxe",                            price:'250 DH', oldPrice:'',       size:'10ml × 3',    url:BASE+'pack-3-parfums-de-luxe',                        image:CDN+'WhatsApp_Image_2026-05-07_at_3.09.58_PM.jpg?v=1778163398' },
+      { id:9,  name:"Pack 3 parfums plus",                               price:'250 DH', oldPrice:'',       size:'10ml × 3',    url:BASE+'pack-3-parfums-plus',                           image:CDN+'WhatsApp_Image_2026-05-07_at_3.09.58_PM_2.jpg?v=1778163398' },
+      { id:10, name:"Pack 2 parfums",                                    price:'199 DH', oldPrice:'250 DH', size:'10ml + 10ml', url:BASE+'pack-2-parfums',                                image:CDN+'WhatsApp_Image_2026-05-07_at_3.09.58_PM_3.jpg?v=1778163398' },
+      { id:11, name:"Pack 3 parfums",                                    price:'250 DH', oldPrice:'',       size:'10ml × 3',    url:BASE+'pack-3-parfums',                                image:CDN+'WhatsApp_Image_2026-05-07_at_3.09.58_PM_1.jpg?v=1778163398' },
+      { id:12, name:"Pack célébrités",                                   price:'599 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-celebrites',                               image:CDN+'WhatsAppImage2026-05-04at9.57.47AM_5.jpg?v=1777885209' },
+      { id:13, name:"Pack princesse",                                    price:'599 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-princesse',                                image:CDN+'WhatsAppImage2026-05-04at9.57.47AM_4.jpg?v=1777885209' },
+      { id:14, name:"Pack clean",                                        price:'399 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-clean',                                    image:CDN+'WhatsAppImage2026-05-04at9.57.47AM_3.jpg?v=1777885209' },
+      { id:15, name:"Pack décontracté",                                  price:'399 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-decontracte',                              image:CDN+'WhatsAppImage2026-05-04at9.57.47AM_1.jpg?v=1777885209' },
+      { id:16, name:"Pack style",                                        price:'399 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-style',                                    image:CDN+'WhatsAppImage2026-05-04at9.57.47AM_2.jpg?v=1777885209' },
+      { id:17, name:"Pack été pour femmes",                              price:'399 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-ete-pour-femmes',                          image:CDN+'WhatsAppImage2026-05-04at9.57.47AM.jpg?v=1777885209' },
+      { id:18, name:"Club de Nuit – Armaf 10ml",                         price:'80 DH',  oldPrice:'',       size:'10ml',        url:BASE+'club-de-nuit',                                  image:CDN+'WhatsAppImage2026-05-03at2.51.29PM_1.jpg?v=1777816454' },
+      { id:19, name:"Pack Jean Paul Gautier Le Male & Le Beau",          price:'399 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-jean-paul-gautier-le-male-le-beau',        image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.21_PM.jpg?v=1777747796' },
+      { id:20, name:"Pack Muslim",                                       price:'220 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-muslim',                                   image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.20_PM_8.jpg?v=1777747796' },
+      { id:21, name:"Pack arabe de luxe pour hommes",                    price:'200 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-arabe-de-luxe-pour-hommes',                image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.20_PM_7.jpg?v=1777747796' },
+      { id:22, name:"Pack élegance",                                     price:'350 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-elegance',                                 image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.20_PM_6.jpg?v=1777747793' },
+      { id:23, name:"Pack de luxe",                                      price:'400 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-de-luxe',                                  image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.20_PM_5.jpg?v=1777747795' },
+      { id:24, name:"Pack Guerlain",                                     price:'250 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-guerlain',                                 image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.20_PM_2.jpg?v=1777747796' },
+      { id:25, name:"Pack Jean Paul Gautier Le Male",                    price:'200 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-jean-paul-gautier-le-male',                image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.20_PM_1.jpg?v=1777747794' },
+      { id:26, name:"Pack Jean Paul Gautier Le Beau",                    price:'250 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-jean-paul-gautier-le-beau',                image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.19_PM_8.jpg?v=1777747794' },
+      { id:27, name:"Jean Paul Gautier luxe",                            price:'250 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'jean-paul-gautier-luxe',                        image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.20_PM.jpg?v=1777747796' },
+      { id:28, name:"Tom Ford – Costa Azzurra EDP",                      price:'170 DH', oldPrice:'',       size:'10ml',        url:BASE+'tom-ford-costa-azzurra-edp-pour-hommes',        image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.19_PM_7.jpg?v=1777747793' },
+      { id:29, name:"Tom Ford – Velvet Orchid",                          price:'190 DH', oldPrice:'',       size:'10ml',        url:BASE+'tom-ford-velvet-orchid-pour-femmes',            image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.19_PM_6.jpg?v=1777747792' },
+      { id:30, name:"Prada Paradoxe Intense",                            price:'150 DH', oldPrice:'',       size:'10ml',        url:BASE+'prada-paradoxe-intense-pour-femme',             image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.19_PM_5.jpg?v=1777747793' },
+      { id:31, name:"J'adore – Dior",                                    price:'160 DH', oldPrice:'',       size:'10ml',        url:BASE+'jadore-dior-pour-femme',                        image:CDN+'WhatsApp_Image_2026-05-02_at_7.47.19_PM_4.jpg?v=1777747792' },
+      { id:32, name:"Prada Paradoxe EDP",                                price:'140 DH', oldPrice:'',       size:'10ml',        url:BASE+'prada-paradoxe-eau-de-parfum-parfum-femme-floral-sensuel-longue-tenue-10ml', image:CDN+'WhatsAppImage2026-04-23at17.44.08.jpg?v=1776962882' },
+      { id:33, name:"JPG La Belle – Parfum Femme",                       price:'140 DH', oldPrice:'',       size:'10ml',        url:BASE+'jean-paul-gaultier-la-belle-parfum-femme',      image:CDN+'WhatsAppImage2026-04-23at16.59.33_1.jpg?v=1776960201' },
+      { id:34, name:"Tornado – Maison Asrar",                            price:'100 DH', oldPrice:'',       size:'10ml',        url:BASE+'tornado',                                       image:CDN+'WhatsAppImage2026-04-23at16.38.50.jpg?v=1776958800' },
+      { id:35, name:"MAWI Moscow Mule",                                  price:'100 DH', oldPrice:'',       size:'10ml',        url:BASE+'mawi-moscow-mule-eau-de-parfum-fraiche-elegance-glaciale-10ml', image:CDN+'WhatsAppImage2026-04-23at15.50.58_1.jpg?v=1776955940' },
+      { id:36, name:"BOSS Bottled Absolu",                               price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'boss-bottled-absolu-parfum-intense-elegance-masculine-10-ml', image:CDN+'WhatsAppImage2026-04-23at15.39.28.jpg?v=1776955703' },
+      { id:37, name:"Pack Prestige 4 Parfums + Sacoche Offerte",         price:'399 DH', oldPrice:'',       size:'4 × 10ml',    url:BASE+'pack-prestige-4-parfums-sacoche-offert',        image:CDN+'WhatsAppImage2026-04-22at01.28.22.jpg?v=1776818680' },
+      { id:38, name:"Pack Parfums de Luxe",                              price:'250 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-parfums-de-luxe',                          image:CDN+'WhatsAppImage2026-04-20at15.33.16.jpg?v=1776699587' },
+      { id:39, name:"Pack parfums 10ml – 220 DH",                       price:'220 DH', oldPrice:'',       size:'Multi 10ml',  url:BASE+'pack-parfums-10ml-220dh',                      image:CDN+'WhatsAppImage2026-04-16at01.51.26.jpg?v=1776300754' },
+      { id:40, name:"Gissah Calabria",                                   price:'80 DH',  oldPrice:'',       size:'10ml',        url:BASE+'gissah-calabria-l-elegance-orientale-sublimee-par-une-fraicheur-mediterraneenne', image:CDN+'WhatsApp_Image_2026-04-23_at_15.43.25.jpg?v=1776955773' },
+      { id:41, name:"Khamrah – Lattafa",                                 price:'80 DH',  oldPrice:'',       size:'10ml',        url:BASE+'khamrah-le-parfum-signature-entre-chaleur-orientale-et-raffinement-absolu-10-ml', image:CDN+'WhatsApp_Image_2026-04-23_at_15.52.54.jpg?v=1776956012' },
+      { id:42, name:"Khamrah Qahwa – Lattafa",                           price:'80 DH',  oldPrice:'',       size:'10ml',        url:BASE+'khamrah-qahwa-l-elegance-orientale-au-parfum-envoutant', image:CDN+'WhatsApp_Image_2026-04-23_at_15.50.58.jpg?v=1776955887' },
+      { id:43, name:"3 Parfums Homme à 250 DH",                         price:'250 DH', oldPrice:'',       size:'10ml × 3',    url:BASE+'3-parfums-homme-a-250-dh',                     image:CDN+'456d8b8f-9de5-4969-9e1b-15e0ce5d95f0.png?v=1775043190' },
+      { id:44, name:"Pack Prestige Homme – 3 Parfums",                   price:'230 DH', oldPrice:'',       size:'10ml × 3',    url:BASE+'pack-prestige-homme-3-parfums-iconiques-en-10ml', image:CDN+'WhatsAppImage2026-03-31at16.15.16.jpg?v=1774994120' },
+      { id:45, name:"Pack Découverte Parfums Homme + Cadeau",            price:'199 DH', oldPrice:'250 DH', size:'Multi 10ml',  url:BASE+'pack-decouverte-parfum-homme-cadeau',           image:CDN+'WhatsAppImage2026-03-11at02.12.42.jpg?v=1773207446' },
+      { id:46, name:"Afnan 9PM Night Out",                               price:'90 DH',  oldPrice:'',       size:'10ml',        url:BASE+'afnan-9pm-night-out-extrait-de-parfum-10ml',    image:CDN+'WhatsApp_Image_2026-04-23_at_15.02.18.jpg?v=1776953760' },
+      { id:47, name:"Montale Bengal Oud",                                price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'montale-bengal-oud-eau-de-parfum-10ml',         image:CDN+'WhatsApp_Image_2026-03-08_at_18.39.43.jpg?v=1772996358' },
+      { id:48, name:"Montale Ristretto Intense Café",                    price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'montale-ristretto-intense-cafe-extrait-de-parfum-10ml', image:CDN+'WhatsAppImage2026-03-08at00.37.14.jpg?v=1772996295' },
+      { id:49, name:"Sì Passione Éclat – Giorgio Armani",               price:'160 DH', oldPrice:'',       size:'10ml',        url:BASE+'si-passione-eclat-giorgio-armani-10ml',         image:CDN+'WhatsAppImage2026-03-07at12.25.02.jpg?v=1772914825' },
+      { id:50, name:"Hugo Jeans Intense – Hugo Boss",                    price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'hugo-jeans-intense-edp-hugo-boss',              image:CDN+'WhatsApp_Image_2026-04-23_at_15.37.53.jpg?v=1776955329' },
+      { id:51, name:"Sauvage EDP – Dior",                                price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'sauvage-eau-de-parfum-dior',                    image:CDN+'WhatsApp_Image_2026-04-22_at_18.49.26_1.jpg?v=1776880365' },
+      { id:52, name:"Gentleman EDP – Givenchy",                          price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'gentleman-eau-de-parfum-givenchy',              image:CDN+'WhatsApp_Image_2026-04-23_at_15.02.18_1.jpg?v=1776953798' },
+      { id:53, name:"Stronger With You Intensely – Armani",              price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'stronger-with-you-intensely-emporio-armani',    image:CDN+'WhatsApp_Image_2026-04-22_at_18.49.25_3.jpg?v=1776880878' },
+      { id:54, name:"Fahrenheit Le Parfum – Dior",                       price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'fahrenheit-le-parfum-de-dior',                  image:CDN+'WhatsApp_Image_2026-04-23_at_15.02.19.jpg?v=1776953905' },
+      { id:55, name:"L'Homme Idéal EDP",                                 price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'le-male-jean-paul-gaultier',                    image:CDN+'WhatsApp_Image_2026-04-22_at_18.49.26_2.jpg?v=1776880415' },
+      { id:56, name:"K by Dolce & Gabbana",                              price:'120 DH', oldPrice:'',       size:'10ml',        url:BASE+'cartier-declaration-eau-de-parfum',             image:CDN+'WhatsApp_Image_2026-04-23_at_15.13.16.jpg?v=1776953991' }
     ];
 
     // State
@@ -491,7 +545,7 @@
     }
 
     function quickReplies() {
-      var labels = ['Parfums pour homme','Offre en cours','Livraison & paiement','Besoin de conseils'];
+      var labels = ['Packs 2 décants 199 DH','Parfums femme','Décants à partir de 80 DH','Livraison & paiement'];
       var wrap = document.createElement('div');
       wrap.className = 'a360-quick-replies';
       labels.forEach(function (l) {
